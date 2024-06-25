@@ -1,7 +1,5 @@
 import ffmpeg from 'fluent-ffmpeg';
 import net from 'net';
-import sharp from 'sharp';
-import fs from 'fs';
 import { exec } from 'child_process';
 import path from 'path';
 

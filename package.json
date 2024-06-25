@@ -19,14 +19,13 @@
     "electron": "^31.0.2",
     "electron-builder": "^24.13.3"
   },
+  "main": "electron.mjs",
   "scripts": {
-    "start": "react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build",
-    "test": "react-scripts --openssl-legacy-provider test",
-    "eject": "react-scripts eject",
-    "electron": "set NODE_OPTIONS=--openssl-legacy-provider electron .",
-    "dist": "set NODE_OPTIONS=--openssl-legacy-provider electron-builder",
-    "main": "set NODE_OPTIONS=--openssl-legacy-provider electron.mjs"
+    "react-start": "react-scripts --openssl-legacy-provider start",
+    "react-build": "react-scripts --openssl-legacy-provider build",
+    "start": "electron .",
+    "dist": "electron-builder",
+    "build:win32": "electron-builder build --win --ia32"
   },
   "build": {
     "appId": "com.example.rtsp-player",
