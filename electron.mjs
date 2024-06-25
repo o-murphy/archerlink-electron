@@ -1,7 +1,6 @@
 import http from 'http';
 import { Server } from 'socket.io';
-import ffmpeg from 'fluent-ffmpeg';
-import path from 'path';
+import RTSPClient from './rtsp.mjs'; // Assuming both files are in the same directory
 
 const server = http.createServer();
 const io = new Server(server, {
@@ -10,34 +9,44 @@ const io = new Server(server, {
   }
 });
 
-// Вкажіть шлях до ffmpeg.exe в кореневій директорії проекту
-const ffmpegPath = path.resolve('ffmpeg.exe');
-ffmpeg.setFfmpegPath(ffmpegPath);
+// RTSP stream configuration
+const rtspConfig = {
+  host: "192.168.100.1",
+  port: 8888,
+  // uri: 'rtsp://localhost:8554/test'
+  uri: 'rtsp://192.168.100.1/stream0'
+};
 
-io.on('connection', (socket) => {
+// Create a global RTSPClient instance
+const rtspClient = new RTSPClient(rtspConfig.host, rtspConfig.port, rtspConfig.uri);
+rtspClient.runAsync();
+
+io.on('connection', async (socket) => {
   console.log('New client connected');
 
-  const stream = ffmpeg('rtsp://localhost:8554/test')
-    .addOption('-f', 'image2pipe')
-    .addOption('-vf', 'fps=25')
-    .format('image2pipe')
-    .pipe();
+  try {
+    // await rtspClient.runAsync(); // Start RTSP client asynchronously
 
-  stream.on('data', (chunk) => {
-    const frame = chunk.toString('base64');
-    socket.emit('frame', frame);
-  });
+    const frameEmitter = () => {
+      if (rtspClient.status === 'Running' && rtspClient.frame) {
+        console.log("Emit frame")
+        const frame = rtspClient.frame.toString('base64');
+        socket.emit('frame', frame);
+      }
+    };
 
-  stream.on('error', (err) => {
-    console.error('Stream error:', err);
-  });
+    const interval = setInterval(frameEmitter, 1000 / rtspClient.fps);
 
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-    stream.kill('SIGINT');
-  });
+    socket.on('disconnect', () => {
+      console.log('Client disconnected');
+      clearInterval(interval); // Clear the interval on disconnect
+      rtspClient.stop(); // Stop the RTSP client when client disconnects
+    });
+  } catch (error) {
+    console.error('Error starting RTSP client:', error);
+  }
 });
 
-server.listen(8080, () => {
-  console.log('Server is listening on port 8080');
+server.listen(8000, () => {
+  console.log('Server is listening on port 8000');
 });

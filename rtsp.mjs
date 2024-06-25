@@ -3,6 +3,18 @@ import net from 'net';
 import sharp from 'sharp';
 import fs from 'fs';
 import { exec } from 'child_process';
+import path from 'path';
+
+const ffmpegPath = path.resolve('ffmpeg.exe');
+ffmpeg.setFfmpegPath(ffmpegPath);
+
+
+
+const _sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
 
 class RTSPClient {
     constructor(host, port, uri, options = {}) {
@@ -22,23 +34,28 @@ class RTSPClient {
 
     async _getStreamFps() {
         // Custom implementation might be needed
-        this.fps = this.fps; // Placeholder
+        // this.fps = this.fps; // Placeholder
         console.info(`Stream FPS: ${this.fps}`);
     }
 
     async _open() {
+
+        const handleError = (err) => {
+            console.error(`FFmpeg error: ${err.message}`);
+            this._ffmpegProcess.removeListener('error', handleError); // Remove the listener
+            _sleep(1000).then(() => this._reconnect());
+        };
+
         while (!this._stopEvent) {
             try {
                 if (this.host && this.port) {
                     await this._initSocket(this.host, this.port);
                 }
                 this._ffmpegProcess = ffmpeg(this.rtspUri)
-                    .inputOptions('-rtsp_transport tcp')
-                    .outputOptions('-f image2pipe', '-vcodec mjpeg', '-')
-                    .on('error', (err) => {
-                        console.error(`FFmpeg error: ${err.message}`);
-                        this._reconnect();
-                    });
+                    .addOption('-f', 'image2pipe')
+                    .addOption('-vf', `fps=${this.fps}`)
+                    .format('image2pipe')
+                    .on('error', handleError);
 
                 this._stream = this._ffmpegProcess.pipe();
                 await this._getStreamFps();
@@ -46,7 +63,8 @@ class RTSPClient {
                 break;
             } catch (e) {
                 console.error(`Failed to connect: ${e.message}`);
-                await this._sleep(1000);
+            } finally {
+                await _sleep(1000);
             }
         }
     }
@@ -95,7 +113,8 @@ class RTSPClient {
                         const frame = await this._readFrame();
                         this.status = 'Running';
                         this.frame = frame;
-                        await this._sleep(1000 / (this.fps * 2));
+                        console.log(this.frame)
+                        await _sleep(1000 / (this.fps * 2));
                     } else {
                         throw new Error("FFmpeg process not running");
                     }
@@ -147,34 +166,6 @@ class RTSPClient {
         } catch (error) {
             throw error;
         }
-    }
-
-    async shot(filename) {
-        if (this.frame) {
-            fs.writeFileSync(`${filename}.jpg`, this.frame);
-            return `${filename}.jpg`;
-        }
-        return null;
-    }
-
-    async resizeFrame(frame, width, height) {
-        const metadata = await sharp(frame).metadata();
-        const aspectRatio = metadata.width / metadata.height;
-
-        let newWidth, newHeight;
-        if (width / height > aspectRatio) {
-            newHeight = height;
-            newWidth = Math.round(height * aspectRatio);
-        } else {
-            newWidth = width;
-            newHeight = Math.round(width / aspectRatio);
-        }
-
-        return sharp(frame).resize(newWidth, newHeight).toBuffer();
-    }
-
-    _sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async _ping(host) {

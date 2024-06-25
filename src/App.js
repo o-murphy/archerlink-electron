@@ -8,7 +8,7 @@ function App() {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    const socket = io('http://localhost:8080');
+    const socket = io('http://localhost:8000');
     socket.on('frame', (data) => {
       const image = new Image();
       image.src = 'data:image/jpeg;base64,' + data;
