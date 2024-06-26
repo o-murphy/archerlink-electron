@@ -1,4 +1,4 @@
-import { app, BrowserWindow, protocol, Menu } from 'electron';
+import { app, BrowserWindow, protocol, session, Menu, net } from 'electron';
 import path from 'path';
 import url, { fileURLToPath } from 'url';
 import http from 'http';
@@ -15,6 +15,10 @@ const io = new Server(server, {
   cors: {
     origin: "*",
   }
+});
+
+server.listen(0, () => {
+  console.log(`Server is listening on port ${server.address().port}`);
 });
 
 // RTSP stream configuration
@@ -41,7 +45,7 @@ function createWindow() {
     },
   });
 
-  Menu.setApplicationMenu(null);
+  // Menu.setApplicationMenu(null);
 
   const startUrl = process.env.ELECTRON_START_URL || `file://${path.join(app.getAppPath(), 'pwa', 'index.html')}`;
   mainWindow.loadURL(startUrl);
@@ -100,26 +104,42 @@ io.on('connection', (socket) => {
   }
 });
 
-server.listen(8000, () => {
-  console.log('Server is listening on port 8000');
-});
-
+// Handle custom protocols
 app.on('ready', () => {
-  protocol.interceptFileProtocol('file', async (request, callback) => {
 
-    let filePath = request.url
+  protocol.handle('file', async (request) => {
+    let filePath = request.url;
 
     if (filePath.startsWith("file:///C:/_expo") || filePath.startsWith("file:///C:/assets")) {
-      let fileUrl = `file://${path.join(app.getAppPath(), 'pwa', request.url.slice("file:///C:/".length))}`
-      if (fs.pathExists(url.fileURLToPath(fileUrl))) {
-        filePath = fileUrl
+      let fileUrl = `file://${path.join(app.getAppPath(), 'pwa', request.url.slice("file:///C:/".length))}`;
+      if (await fs.pathExists(url.fileURLToPath(fileUrl))) {
+        filePath = fileUrl;
       }
     }
-    filePath = url.fileURLToPath(filePath)
-    // Resolve the file path correctly
-    callback({ path: path.normalize(filePath) });
-  })
-  createWindow()
+
+    console.log(`Handling file request: ${filePath}`);
+    return net.fetch(filePath, { bypassCustomProtocolHandlers: true });
+  });
+
+  protocol.handle('http', async (request) => {
+    let newPath = request.url;
+    const { host, pathname } = url.parse(request.url);
+
+    // Custom routing for Socket.IO requests
+    if (host === 'file' && pathname.startsWith('/socket.io/')) {
+      // newPath = `http://127.0.0.1:${server.address().port}${pathname}`;
+      newPath = `http://127.0.0.1:${server.address().port}` + newPath.slice("http://file".length);
+    }
+
+    console.log(`Handling http request: ${newPath}`);
+    return net.request({
+      protocol: 'http',
+      method: 'GET',
+      url: newPath
+    });
+  });
+
+  createWindow();
 });
 
 app.on('window-all-closed', function () {
