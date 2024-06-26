@@ -6,8 +6,14 @@ import RTSPClient from './rtsp.mjs'; // Adjust the path as necessary
 import sharp from 'sharp';
 import express from 'express';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+
+console.log("App path", app.getAppPath())
+
+const __dirname = path.resolve()
+console.log("dirname", __dirname)
+
 
 const exp = express();
 exp.use(express.static(path.join(__dirname, 'pwa')));

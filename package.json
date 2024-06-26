@@ -3,42 +3,39 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
+    "express": "^4.19.2",
     "fluent-ffmpeg": "^2.1.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-scripts": "^5.0.1",
     "sharp": "^0.33.4",
     "socket.io": "^4.7.5",
-    "socket.io-client": "^4.7.5",
-    "web-vitals": "^4.2.0"
+    "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
     "electron": "^31.0.2",
     "electron-builder": "^24.13.3"
   },
-  "main": "electron.mjs",
   "scripts": {
-    "react-start": "react-scripts --openssl-legacy-provider start",
-    "react-build": "react-scripts --openssl-legacy-provider build",
     "start": "electron .",
     "dist": "electron-builder",
     "build:win32": "electron-builder build --win --ia32"
   },
+  "main": "electron.mjs",
   "build": {
     "appId": "com.example.rtsp-player",
+    "files": [
+      "./*.mjs"
+    ],
+    "extraFiles": [
+      "./ffmpeg.exe",
+      "./pwa/**/*"
+    ],
+    "extraResources": [],
+    "extraMetadata": {
+      "main": "electron.mjs"
+    },
     "win": {
       "target": "nsis",
-      "icon": "path/to/icon.ico"
+      "icon": "pwa/favicon.ico"
     }
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [

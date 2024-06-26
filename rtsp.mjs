@@ -4,7 +4,7 @@ import { exec } from 'child_process';
 import path from 'path';
 import sharp from 'sharp';
 
-const ffmpegPath = path.resolve('ffmpeg.exe');
+const ffmpegPath = path.resolve('./ffmpeg.exe');
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 
