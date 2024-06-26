@@ -2,6 +2,7 @@ import ffmpeg from 'fluent-ffmpeg';
 import net from 'net';
 import { exec } from 'child_process';
 import path from 'path';
+import sharp from 'sharp';
 
 const ffmpegPath = path.resolve('ffmpeg.exe');
 ffmpeg.setFfmpegPath(ffmpegPath);
@@ -52,8 +53,20 @@ class RTSPClient {
                 this._ffmpegProcess = ffmpeg(this.rtspUri)
                     .addOption('-f', 'image2pipe')
                     .addOption('-vf', `fps=${this.fps}`)
+                    .videoCodec('mjpeg') // Specify MJPEG codec for JPEG encoding
+                    // .addOption('-pix_fmt', 'yuv420p') // Chroma subsampling 4:2:0
+                    .addOption('-q:v', '1') // Adjust quality (2 is a good balance between size and quality)
+                    // .addOption('-b:v', '2M') // 2 Mbps bitrate
                     .format('image2pipe')
-                    .on('error', handleError);
+                    .on('error', handleError)
+                    // .on('progress', (progress) => {
+                    //     console.log('Bitrate:', progress.currentKbps, 'kbps');
+                    //     console.log('Framerate:', progress.currentFps, 'fps');
+                    //     if (progress.currentFps) {
+                    //         this.fps = progress.currentFps
+                    //     }
+                    //     // Optionally, you can log other bitrate details like 'currentKbps', 'currentFps', etc.
+                    //   });
 
                 this._stream = this._ffmpegProcess.pipe();
                 await this._getStreamFps();
@@ -92,8 +105,18 @@ class RTSPClient {
 
     async _readFrame() {
         return new Promise((resolve, reject) => {
-            this._stream.once('data', (chunk) => {
+            this._stream.once('data', async (chunk) => {
                 resolve(chunk);
+                // const frameBuffer = Buffer.from(chunk);
+                // try {
+                //     const metadata = await sharp(frameBuffer).metadata();
+                //     const { width, height } = metadata;
+                //     console.log(`Frame dimensions: ${width}x${height}`);
+                //     resolve(frameBuffer);
+                // } catch (err) {
+                //     reject(new Error("Failed to read frame metadata"));
+                // }
+
             });
             this._stream.once('error', (err) => {
                 reject(new Error("Failed to read frame"));
@@ -111,7 +134,6 @@ class RTSPClient {
                         const frame = await this._readFrame();
                         this.status = 'Running';
                         this.frame = frame;
-                        console.log(this.frame)
                         await _sleep(1000 / (this.fps * 2));
                     } else {
                         throw new Error("FFmpeg process not running");

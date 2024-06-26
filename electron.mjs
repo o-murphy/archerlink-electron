@@ -5,6 +5,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import RTSPClient from './rtsp.mjs'; // Adjust the path as necessary
 import fs from 'fs-extra';
+import sharp from 'sharp';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,19 +49,45 @@ function createWindow() {
   });
 }
 
-io.on('connection', async (socket) => {
+io.on('connection', (socket) => {
   console.log('New client connected');
 
   try {
-    const frameEmitter = () => {
-      if (rtspClient.status === 'Running' && rtspClient.frame) {
-        console.log("Emit frame")
-        const frame = rtspClient.frame.toString('base64');
-        socket.emit('frame', frame);
+    const frameEmitter = async () => {
+      const frame = rtspClient.frame
+
+      const jpegFrame = async (frameBuffer) => {
+        return await sharp(frameBuffer)
+          .jpeg({ quality: 100 }) // Встановити високу якість JPEG
+          .toBuffer()
+      };
+
+      let frameBase64 = null;
+      if (frame && rtspClient.status === 'Running') {
+        const jpegBuffer = await jpegFrame(frame);
+        frameBase64 = jpegBuffer.toString('base64');
       }
+
+      socket.emit('frame', {
+        "wifi": true,
+        "stream": {
+            "frame": frameBase64,
+            "state": rtspClient.status,
+            "error": rtspClient.error
+        },
+        "recording": {
+            "state": false,
+        }
+      });
     };
 
     const interval = setInterval(frameEmitter, 1000 / rtspClient.fps);
+    // const interval = setInterval(frameEmitter, 1000 / 1);
+
+
+    socket.on('makeShot', (data) => {
+        console.log("received makeShot event")
+    });
 
     socket.on('disconnect', () => {
       console.log('Client disconnected');
