@@ -103,6 +103,27 @@ io.on('connection', (socket) => {
 
 app.on('ready', createWindow);
 
+app.on('window-all-closed', function () {
+  rtspClient.stop();
+  if (process.platform !== 'darwin') {
+    if (server) {
+      server.close(() => {
+        console.log('Express server closed');
+        app.quit(); // Quit the Electron app after closing the server
+      });
+    } else {
+      app.quit(); // Quit the Electron app if server is not defined
+    }
+  }
+});
+
+app.on('activate', function () {
+  if (mainWindow === null) {
+    createWindow();
+  }
+});
+
+
 // app.on('ready', () => {
 //   protocol.handle('file', async (request) => {
 //     let filePath = request.url;
@@ -142,16 +163,3 @@ app.on('ready', createWindow);
 
 //   createWindow();
 // });
-
-app.on('window-all-closed', function () {
-  rtspClient.stop();
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('activate', function () {
-  if (mainWindow === null) {
-    createWindow();
-  }
-});
