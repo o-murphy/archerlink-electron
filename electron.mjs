@@ -40,7 +40,7 @@ function createWindow() {
     },
   });
 
-  const startUrl = process.env.ELECTRON_START_URL || `file://${path.join(__dirname, 'pwa/index.html')}`;
+  const startUrl = process.env.ELECTRON_START_URL || `file://${path.join(app.getAppPath(), 'pwa', 'index.html')}`;
   mainWindow.loadURL(startUrl);
 
   mainWindow.on('closed', function () {
@@ -76,33 +76,26 @@ server.listen(8000, () => {
 });
 
 app.on('ready', () => {
-  // protocol.handle('file', async (request, callback) => {
-  //   const pathname = decodeURIComponent(request.url.replace('file:///', ''));
-  //   if (path.isAbsolute(pathname) ? await fs.pathExists(pathname) : await fs.pathExists(`/${pathname}`)) {
-  //     console.log(pathname)
-  //     callback(pathname);
-  //   } else {
-  //     const filePath = path.join(app.getAppPath(), '.webpack/renderer', pathname);
-  //     console.log(pathname)
-  //     callback(filePath);
-  //   }
-  // });
+  protocol.interceptFileProtocol('file', async (request, callback) => {
 
-  protocol.handle('file', async (request) => {
-    console.log(request.url)
-    // const fileUrl = request.url.replace('static://', '');
-    // console.log(fileUrl)
-    // const filePath = path.join(app.getAppPath(), fileUrl);
-    return net.fetch(request.url)
-    re
-  });
+    let filePath = request.url
 
+    if (filePath.startsWith("file:///C:/_expo") || filePath.startsWith("file:///C:/assets")) {
+      let fileUrl = `file://${path.join(app.getAppPath(), 'pwa', request.url.slice("file:///C:/".length))}`
+      if (fs.pathExists(url.fileURLToPath(fileUrl))) {
+        filePath = fileUrl
+      }
+    }
+    filePath = url.fileURLToPath(filePath)
+    // Resolve the file path correctly
+    callback({ path: path.normalize(filePath) });
+  })
   createWindow()
 });
 
 app.on('window-all-closed', function () {
+  rtspClient.stop()
   if (process.platform !== 'darwin') {
-    rtspClient.stop()
     app.quit();
   }
 });
