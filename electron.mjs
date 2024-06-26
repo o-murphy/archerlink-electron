@@ -1,4 +1,4 @@
-import { app, BrowserWindow, net, protocol } from 'electron';
+import { app, BrowserWindow, protocol, Menu } from 'electron';
 import path from 'path';
 import url, { fileURLToPath } from 'url';
 import http from 'http';
@@ -40,6 +40,8 @@ function createWindow() {
       contextIsolation: false,
     },
   });
+
+  Menu.setApplicationMenu(null);
 
   const startUrl = process.env.ELECTRON_START_URL || `file://${path.join(app.getAppPath(), 'pwa', 'index.html')}`;
   mainWindow.loadURL(startUrl);
