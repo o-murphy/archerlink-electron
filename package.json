@@ -6,16 +6,15 @@
     "express": "^4.19.2",
     "fluent-ffmpeg": "^2.1.2",
     "google-protobuf": "^3.21.2",
-    "grpc-tools": "^1.12.4",
     "luxon": "^3.4.4",
     "node-wifi": "^2.0.16",
-    "protobufjs": "^7.3.2",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
     "electron": "^31.0.2",
     "electron-builder": "^24.13.3",
+    "grpc-tools": "^1.12.4",
     "protobufjs-cli": "^1.1.2"
   },
   "scripts": {
