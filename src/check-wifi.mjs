@@ -21,4 +21,4 @@ const checkWifiConnection = async () => {
   }
 };
 
-export { checkWifiConnection };
+export default checkWifiConnection;

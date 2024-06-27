@@ -4,6 +4,7 @@ import { exec } from 'child_process';
 import path from 'path';
 
 const ffmpegPath = path.resolve('./ffmpeg.exe');
+console.log("FFmpeg:", ffmpegPath)
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 

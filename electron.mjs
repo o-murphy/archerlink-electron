@@ -1,9 +1,10 @@
 import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import { Server } from 'socket.io';
-import RTSPClient from './rtsp.mjs'; // Adjust the path as necessary
 import express from 'express';
-import { checkWifiConnection } from './src/check-wifi.mjs';
+import RTSPClient from './src/rtsp.mjs'; // Adjust the path as necessary
+import checkWifiConnection from './src/check-wifi.mjs';
+import { createOutputDir, openOutputDir, saveFrameToFile } from './src/media-dir.mjs';
 
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
@@ -12,6 +13,9 @@ console.log("App path", app.getAppPath())
 
 const __dirname = path.resolve()
 console.log("dirname", __dirname)
+
+
+await createOutputDir()
 
 
 const exp = express();
@@ -26,6 +30,34 @@ const io = new Server(server, {
     origin: "*",
   }
 });
+
+// Endpoint to handle POST requests
+exp.post('/api/media', async (req, res) => {
+  // const data = req.body; // Assuming JSON data is sent in the request body
+
+  // Process the data received
+  // console.log("Received POST data:", data);
+  await openOutputDir()
+
+  // Send a response
+  res.status(200).json({ message: 'Data received successfully' });
+});
+
+
+exp.post('/api/photo', async (req, res) => {
+  try {
+    if (rtspClient.frame) {
+      const filePath = await saveFrameToFile(rtspClient.frame); // Save the current frame
+      res.status(200).json({filename: filePath});
+    } else {
+      res.status(400).json({ message: 'No frame available' });
+    }
+  } catch (err) {
+    console.error('Error in POST /api/photo:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 // RTSP stream configuration
 const rtspConfig = {
