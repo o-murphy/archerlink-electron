@@ -97,22 +97,48 @@ class RTSPClient {
         await this._open();
     }
 
-    async _readFrame() {
+    async _readFrame(timeoutMs = 1000) {
         return new Promise((resolve, reject) => {
-            const handleData = async (chunk) => {
-                this._stream.removeListener('error', handleError); // Remove the error listener
+            let timer = setTimeout(() => {
+                this._stream.removeListener('data', handleData);
+                this._stream.removeListener('error', handleError);
+                reject(new Error('Timeout while waiting for frame'));
+            }, timeoutMs);
+    
+            const handleData = (chunk) => {
+                clearTimeout(timer);
+                this._stream.removeListener('error', handleError);
                 resolve(chunk);
             };
-
+    
             const handleError = (err) => {
-                this._stream.removeListener('data', handleData); // Remove the data listener
-                reject(new Error("Failed to read frame"));
+                clearTimeout(timer);
+                this._stream.removeListener('data', handleData);
+                reject(new Error('Failed to read frame'));
             };
-
+    
             this._stream.once('data', handleData);
             this._stream.once('error', handleError);
         });
     }
+
+    // async _readFrame() {
+    //     // TODO: add timeout
+    //     return new Promise((resolve, reject) => {
+    //         const handleData = async (chunk) => {
+    //             this._stream.removeListener('error', handleError); // Remove the error listener
+    //             resolve(chunk);
+    //         };
+
+    //         const handleError = (err) => {
+    //             this._stream.removeListener('data', handleData); // Remove the data listener
+    //             reject(new Error("Failed to read frame"));
+    //         };
+
+    //         this._stream.once('data', handleData);
+    //         this._stream.once('error', handleError);
+    //     });
+    // }
 
     async runAsync() {
         try {
@@ -121,7 +147,7 @@ class RTSPClient {
             while (!this._stopEvent) {
                 try {
                     if (this._ffmpegProcess) {
-                        const frame = await this._readFrame();
+                        const frame = await this._readFrame(1000);
                         this.status = 'Running';
                         this.frame = frame;
                         await _sleep(1000 / (this.fps * 2));
@@ -151,6 +177,33 @@ class RTSPClient {
         await this._close();
     }
 
+    // async _initSocket(host, port) {
+    //     try {
+    //         if (!(await this._ping(host))) {
+    //             throw new Error("Host is not reachable");
+    //         }
+
+    //         this._socket = new net.Socket();
+    //         this._socket.connect(port, host, () => {
+    //             const initCommand = "CMD_RTSP_TRANS_START";
+    //             this._socket.write(initCommand);
+    //             this._socket.once('data', (data) => {
+    //                 const response = data.toString();
+    //                 console.info(`Response: ${response}`);
+    //                 if (!response.includes("CMD_ACK_START_RTSP_LIVE")) {
+    //                     throw new Error("Socket error");
+    //                 }
+    //             });
+    //         });
+
+    //         this._socket.on('error', (err) => {
+    //             throw new Error(`Socket error: ${err.message}`);
+    //         });
+    //     } catch (error) {
+    //         throw error;
+    //     }
+    // }
+
     async _initSocket(host, port) {
         try {
             if (!(await this._ping(host))) {
@@ -171,7 +224,12 @@ class RTSPClient {
             });
 
             this._socket.on('error', (err) => {
-                throw new Error(`Socket error: ${err.message}`);
+                if (err.code === 'ECONNRESET') {
+                    console.error('Socket error: read ECONNRESET, reconnecting...');
+                    this._reconnect(); // Handle ECONNRESET by reconnecting
+                } else {
+                    throw new Error(`Socket error: ${err.message}`);
+                }
             });
         } catch (error) {
             throw error;

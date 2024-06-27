@@ -3,6 +3,7 @@ import path from 'path';
 import { Server } from 'socket.io';
 import RTSPClient from './rtsp.mjs'; // Adjust the path as necessary
 import express from 'express';
+import { checkWifiConnection } from './src/check-wifi.mjs';
 
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
@@ -37,12 +38,27 @@ const rtspConfig = {
 const rtspClient = new RTSPClient(rtspConfig.host, rtspConfig.port, rtspConfig.uri);
 rtspClient.runAsync();
 
+let wifiStatus = false; // Initial state
+
+
+// Periodically check Wi-Fi connection every 30 seconds
+const wifiCheckInterval = setInterval(async () => {
+  const currentWifi = await checkWifiConnection();
+  
+  // Update wifiStatus only if it has changed
+  if (wifiStatus !== currentWifi) {
+    wifiStatus = currentWifi;
+    console.log(`Wi-Fi status updated: ${wifiStatus}`);
+  }
+}, 1000); // Check every 1 seconds
+
+
 let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 720,
+    height: 540,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -64,9 +80,8 @@ io.on('connection', (socket) => {
 
   const frameEmitter = async () => {
     const frame = rtspClient.frame;
-
     socket.emit('frame', {
-      wifi: true,
+      wifi: wifiStatus,
       stream: {
         frame: frame ? frame.toString('base64') : null,
         state: rtspClient.status,
@@ -94,15 +109,14 @@ app.on('ready', createWindow);
 
 app.on('window-all-closed', function () {
   rtspClient.stop();
+  clearInterval(wifiCheckInterval);
   if (process.platform !== 'darwin') {
     if (server) {
       server.close(() => {
         console.log('Express server closed');
-        app.quit(); // Quit the Electron app after closing the server
       });
-    } else {
-      app.quit(); // Quit the Electron app if server is not defined
     }
+    app.quit(); // Quit the Electron app after closing the server
   }
 });
 
