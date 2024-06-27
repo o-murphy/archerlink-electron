@@ -59,6 +59,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 720,
     height: 540,
+    show: false,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -66,9 +67,12 @@ function createWindow() {
     autoHideMenuBar: true,
   });
 
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show(); // Show the window when content is ready
+  });
+
   // Menu.setApplicationMenu(null)
   mainWindow.loadURL(`http://localhost:${server.address().port}/index.html`);
-
 
   mainWindow.on('closed', function () {
     mainWindow = null;
