@@ -68,3 +68,14 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+### create `archer_protocol_pb.js` module
+
+<!-- npx pbjs -t json ./src/proto/archer_protocol.proto > bundle.json --es6  -->
+
+
+```bash
+npm install gprc-tools
+node node_modules/grpc-tools/bin/protoc.js --js_out=import_style=commonjs,binary:./src/proto --proto_path=./src/proto ./src/proto/archer_protocol.proto
+```
