@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import { Server } from 'socket.io';
 import RTSPClient from './rtsp.mjs'; // Adjust the path as necessary
@@ -50,10 +50,7 @@ function createWindow() {
     autoHideMenuBar: true,
   });
 
-  // Menu.setApplicationMenu(null);
-
-  // const startUrl = process.env.ELECTRON_START_URL || `file://${path.join(app.getAppPath(), 'pwa', 'index.html')}`;
-
+  // Menu.setApplicationMenu(null)
   mainWindow.loadURL(`http://localhost:${server.address().port}/index.html`);
 
 
@@ -68,22 +65,9 @@ io.on('connection', (socket) => {
   const frameEmitter = async () => {
     const frame = rtspClient.frame;
 
-    // const jpegFrame = async (frameBuffer) => {
-    //   return await sharp(frameBuffer)
-    //     .jpeg({ quality: 100 }) // Set high JPEG quality
-    //     .toBuffer();
-    // };
-
-    // let frameBase64 = null;
-    // if (frame && rtspClient.status === 'Running') {
-    //   const jpegBuffer = await jpegFrame(frame);
-    //   frameBase64 = jpegBuffer.toString('base64');
-    // }
-
     socket.emit('frame', {
       wifi: true,
       stream: {
-        // frame: frameBase64,
         frame: frame ? frame.toString('base64') : null,
         state: rtspClient.status,
         error: rtspClient.error,
@@ -127,44 +111,3 @@ app.on('activate', function () {
     createWindow();
   }
 });
-
-
-// app.on('ready', () => {
-//   protocol.handle('file', async (request) => {
-//     let filePath = request.url;
-
-//     if (filePath.startsWith("file:///C:/_expo") || filePath.startsWith("file:///C:/assets")) {
-//       let fileUrl = `file://${path.join(app.getAppPath(), 'pwa', request.url.slice("file:///C:/".length))}`;
-//       if (await fs.pathExists(url.fileURLToPath(fileUrl))) {
-//         filePath = fileUrl;
-//       }
-//     }
-
-//     console.log(`Handling file request: ${filePath}`);
-//     return net.fetch(filePath, { bypassCustomProtocolHandlers: true });
-//   });
-
-//   protocol.handle('http', async (request) => {
-//     let newPath = request.url;
-//     const { host, pathname } = url.parse(request.url);
-
-//     if (host === 'file' && pathname.startsWith('/socket.io/')) {
-//       // newPath = `http://127.0.0.1:${server.address().port}${pathname}`;
-//       // newPath = `http://127.0.0.1:${server.address().port}` + newPath.slice("http://file".length);
-//       const customRequest = net.request({
-//         protocol: 'http',
-//         method: 'GET',
-//         hostname: '127.0.0.1',
-//         port: server.address().port,
-//         path: newPath.slice("http://file".length)
-//       });
-//       console.log("Handling http request:", customRequest);
-
-//       return net.fetch(customRequest)
-//     }
-
-//     return net.fetch(request)
-//   });
-
-//   createWindow();
-// });

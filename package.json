@@ -1,5 +1,5 @@
 {
-  "name": "rtsp-player",
+  "name": "archerlink-electron",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -13,7 +13,7 @@
     "electron-builder": "^24.13.3"
   },
   "scripts": {
-    "start": "electron .",
+    "start": "electron --trace-warnings .",
     "dist": "electron-builder",
     "build:win32": "electron-builder build --win --ia32",
     "build:win64": "electron-builder build --win --x64"

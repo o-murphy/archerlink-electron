@@ -40,7 +40,9 @@ class RTSPClient {
 
         const handleError = (err) => {
             console.error(`FFmpeg error: ${err.message}`);
-            this._ffmpegProcess.removeListener('error', handleError); // Remove the listener
+            if (this._ffmpegProcess) {
+                this._ffmpegProcess.removeListener('error', handleError); // Remove the listener if it exists
+            }
             _sleep(1000).then(() => this._reconnect());
         };
 
@@ -53,21 +55,14 @@ class RTSPClient {
                     .addOption('-f', 'image2pipe')
                     .addOption('-vf', `fps=${this.fps}`)
                     .videoCodec('mjpeg') // Specify MJPEG codec for JPEG encoding
-                    // .addOption('-pix_fmt', 'yuv420p') // Chroma subsampling 4:2:0
                     .addOption('-q:v', '1') // Adjust quality (2 is a good balance between size and quality)
-                    // .addOption('-b:v', '2M') // 2 Mbps bitrate
                     .format('image2pipe')
                     .on('error', handleError)
-                    // .on('progress', (progress) => {
-                    //     console.log('Bitrate:', progress.currentKbps, 'kbps');
-                    //     console.log('Framerate:', progress.currentFps, 'fps');
-                    //     if (progress.currentFps) {
-                    //         this.fps = progress.currentFps
-                    //     }
-                    //     // Optionally, you can log other bitrate details like 'currentKbps', 'currentFps', etc.
-                    //   });
+
+                this._ffmpegProcess.setMaxListeners(5); // Set max listeners limit
 
                 this._stream = this._ffmpegProcess.pipe();
+                // this._stream.setMaxListeners(2)
                 await this._getStreamFps();
                 console.info("Connected to stream");
                 break;
@@ -104,22 +99,18 @@ class RTSPClient {
 
     async _readFrame() {
         return new Promise((resolve, reject) => {
-            this._stream.once('data', async (chunk) => {
+            const handleData = async (chunk) => {
+                this._stream.removeListener('error', handleError); // Remove the error listener
                 resolve(chunk);
-                // const frameBuffer = Buffer.from(chunk);
-                // try {
-                //     const metadata = await sharp(frameBuffer).metadata();
-                //     const { width, height } = metadata;
-                //     console.log(`Frame dimensions: ${width}x${height}`);
-                //     resolve(frameBuffer);
-                // } catch (err) {
-                //     reject(new Error("Failed to read frame metadata"));
-                // }
+            };
 
-            });
-            this._stream.once('error', (err) => {
+            const handleError = (err) => {
+                this._stream.removeListener('data', handleData); // Remove the data listener
                 reject(new Error("Failed to read frame"));
-            });
+            };
+
+            this._stream.once('data', handleData);
+            this._stream.once('error', handleError);
         });
     }
 
