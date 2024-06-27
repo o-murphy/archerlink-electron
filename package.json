@@ -5,7 +5,6 @@
   "dependencies": {
     "express": "^4.19.2",
     "fluent-ffmpeg": "^2.1.2",
-    "sharp": "^0.33.4",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5"
   },
@@ -16,11 +15,13 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder",
-    "build:win32": "electron-builder build --win --ia32"
+    "build:win32": "electron-builder build --win --ia32",
+    "build:win64": "electron-builder build --win --x64"
   },
   "main": "electron.mjs",
   "build": {
-    "appId": "com.example.rtsp-player",
+    "appId": "com.example.archerlink",
+    "productName": "ArcherLink",
     "files": [
       "./*.mjs"
     ],

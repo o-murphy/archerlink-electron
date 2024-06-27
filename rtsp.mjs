@@ -2,7 +2,6 @@ import ffmpeg from 'fluent-ffmpeg';
 import net from 'net';
 import { exec } from 'child_process';
 import path from 'path';
-import sharp from 'sharp';
 
 const ffmpegPath = path.resolve('./ffmpeg.exe');
 ffmpeg.setFfmpegPath(ffmpegPath);

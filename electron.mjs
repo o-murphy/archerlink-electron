@@ -1,9 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { Server } from 'socket.io';
 import RTSPClient from './rtsp.mjs'; // Adjust the path as necessary
-import sharp from 'sharp';
 import express from 'express';
 
 // const __filename = fileURLToPath(import.meta.url);
@@ -70,22 +68,23 @@ io.on('connection', (socket) => {
   const frameEmitter = async () => {
     const frame = rtspClient.frame;
 
-    const jpegFrame = async (frameBuffer) => {
-      return await sharp(frameBuffer)
-        .jpeg({ quality: 100 }) // Set high JPEG quality
-        .toBuffer();
-    };
+    // const jpegFrame = async (frameBuffer) => {
+    //   return await sharp(frameBuffer)
+    //     .jpeg({ quality: 100 }) // Set high JPEG quality
+    //     .toBuffer();
+    // };
 
-    let frameBase64 = null;
-    if (frame && rtspClient.status === 'Running') {
-      const jpegBuffer = await jpegFrame(frame);
-      frameBase64 = jpegBuffer.toString('base64');
-    }
+    // let frameBase64 = null;
+    // if (frame && rtspClient.status === 'Running') {
+    //   const jpegBuffer = await jpegFrame(frame);
+    //   frameBase64 = jpegBuffer.toString('base64');
+    // }
 
     socket.emit('frame', {
       wifi: true,
       stream: {
-        frame: frameBase64,
+        // frame: frameBase64,
+        frame: frame ? frame.toString('base64') : null,
         state: rtspClient.status,
         error: rtspClient.error,
       },
