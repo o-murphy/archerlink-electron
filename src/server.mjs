@@ -34,18 +34,6 @@ const createServer = async ({staticPath, rtspClient}) => {
         }
     });
     
-    // Endpoint to handle POST requests
-    exp.post('/api/media', async (req, res) => {
-        // const data = req.body; // Assuming JSON data is sent in the request body
-    
-        // Process the data received
-        // console.log("Received POST data:", data);
-        await openOutputDir()
-    
-        // Send a response
-        res.status(200).json({ message: 'Data received successfully' });
-    });
-    
     io.on('connection', (socket) => {
         console.log('New client connected');
     
@@ -80,6 +68,16 @@ const createServer = async ({staticPath, rtspClient}) => {
                 io.emit('photo', { error: 'Internal server error' });
             }
 
+        });
+
+        socket.on('openMedia', async (data) => {
+            console.log("received openMedia event");
+            await openOutputDir()
+        });
+
+        socket.on('toggleRecord', async (data) => {
+            console.log("received toggleRecord event");
+            io.emit('record', {error: 'Not implemented yet'})
         });
     
         socket.on('disconnect', () => {
