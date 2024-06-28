@@ -22,7 +22,7 @@ rtspClient.runAsync();
 
 const server = await createServer(
   {
-    staticPath: path.join(__dirname, 'pwa'),
+    publicPath: path.join(__dirname, 'public'),
     rtspClient: rtspClient
   }
 )

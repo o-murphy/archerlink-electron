@@ -20,9 +20,9 @@ export const wifiCheckInterval = setInterval(async () => {
 }, 1000); // Check every 1 seconds
 
 
-const createServer = async ({staticPath, rtspClient}) => {
+const createServer = async ({publicPath, rtspClient}) => {
     const exp = express();
-    exp.use(express.static(staticPath));
+    exp.use(express.static(publicPath));
     // Start the Express server
     const server = exp.listen(0, () => {
         console.log(`Express server is running on http://localhost:${server.address().port}`);

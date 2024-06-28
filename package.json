@@ -34,7 +34,7 @@
     ],
     "extraFiles": [
       "./ffmpeg.exe",
-      "./pwa/**/*"
+      "./public/**/*"
     ],
     "extraResources": [],
     "extraMetadata": {
@@ -42,7 +42,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "pwa/favicon.ico"
+      "icon": "public/favicon.ico"
     }
   },
   "browserslist": {
