@@ -46,21 +46,6 @@ const createServer = async ({staticPath, rtspClient}) => {
         res.status(200).json({ message: 'Data received successfully' });
     });
     
-    
-    exp.post('/api/photo', async (req, res) => {
-        try {
-            if (rtspClient.frame) {
-                const filePath = await saveFrameToFile(rtspClient.frame); // Save the current frame
-                res.status(200).json({ filename: filePath });
-            } else {
-                res.status(400).json({ message: 'No frame available' });
-            }
-        } catch (err) {
-            console.error('Error in POST /api/photo:', err);
-            res.status(500).json({ message: 'Internal server error' });
-        }
-    });
-    
     io.on('connection', (socket) => {
         console.log('New client connected');
     
@@ -74,15 +59,27 @@ const createServer = async ({staticPath, rtspClient}) => {
                     error: rtspClient.error,
                 },
                 recording: {
-                    state: false,
+                    state: false,  // TODO: recorder
                 }
             });
         };
     
         const interval = setInterval(frameEmitter, 1000 / rtspClient.fps);
     
-        socket.on('makeShot', (data) => {
+        socket.on('makeShot', async (data) => {
             console.log("received makeShot event");
+
+            try {
+                if (rtspClient.frame) {
+                    const filePath = await saveFrameToFile(rtspClient.frame); // Save the current frame
+                    io.emit('photo', { filename: filePath });
+                } else {
+                    io.emit('photo', { error: 'No frame available' });
+                }
+            } catch (err) {
+                io.emit('photo', { error: 'Internal server error' });
+            }
+
         });
     
         socket.on('disconnect', () => {
