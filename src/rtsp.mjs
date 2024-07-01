@@ -36,12 +36,12 @@ class RTSPClient {
 
     async _open() {
 
-        const handleError = (err) => {
+        const handleError = async (err) => {
             console.error(`FFmpeg error: ${err.message}`);
             if (this._ffmpegProcess) {
                 this._ffmpegProcess.removeListener('error', handleError);
             }
-            _sleep(1000).then(() => this._reconnect());
+            await _sleep(1000).then(() => this._reconnect());
         };
 
         while (!this._stopEvent) {
@@ -50,12 +50,18 @@ class RTSPClient {
                     await this._initSocket(this.host, this.port);
                 }
                 this._ffmpegProcess = ffmpeg(this.rtspUri)
+                    .addOption('-rtsp_transport', `udp`)
                     .addOption('-f', 'image2pipe')
-                    .addOption('-vf', `fps=${this.fps}`)
+                    // .addOption('-vf', `fps=${this.fps}`)
                     .videoCodec('mjpeg')
                     .addOption('-q:v', '1')
                     .format('image2pipe')
                     .on('error', handleError)
+
+                // this._ffmpegProcess.on('progress', (progress) => {
+                //     console.log("REC FPS:", progress.currentFps)
+                //     this.fps = progress.currentFps
+                // })
 
                 this._ffmpegProcess.setMaxListeners(5);
 
@@ -73,7 +79,11 @@ class RTSPClient {
 
     async _close() {
         if (this._ffmpegProcess) {
-            this._ffmpegProcess.kill();
+            if (process.platform === 'win32') {
+                this._ffmpegProcess.ffmpegProc.stdin.write('q')
+            }
+            // this._ffmpegProcess.kill();
+
             this._ffmpegProcess = null;
         }
         this.status = 'Stopped';
@@ -101,19 +111,19 @@ class RTSPClient {
                 this._stream.removeListener('error', handleError);
                 reject(new Error('Timeout while waiting for frame'));
             }, timeoutMs);
-    
+
             const handleData = (chunk) => {
                 clearTimeout(timer);
                 this._stream.removeListener('error', handleError);
                 resolve(chunk);
             };
-    
+
             const handleError = (err) => {
                 clearTimeout(timer);
                 this._stream.removeListener('data', handleData);
                 reject(new Error('Failed to read frame'));
             };
-    
+
             this._stream.once('data', handleData);
             this._stream.once('error', handleError);
         });
@@ -126,7 +136,7 @@ class RTSPClient {
             while (!this._stopEvent) {
                 try {
                     if (this._ffmpegProcess) {
-                        const frame = await this._readFrame(1000);
+                        const frame = await this._readFrame(2000);
                         this.status = 'Running';
                         this.frame = frame;
                         await _sleep(1000 / (this.fps * 2));

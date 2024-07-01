@@ -64,6 +64,7 @@ app.on('ready', createWindow);
 
 app.on('window-all-closed', function () {
   rtspClient.stop();
+  movRecorder.stop_recording();
   clearInterval(wifiCheckInterval);
   if (process.platform !== 'darwin') {
     if (server) {

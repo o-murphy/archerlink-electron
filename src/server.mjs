@@ -76,6 +76,12 @@ const createServer = async ({publicPath, rtspClient, movRecorder}) => {
         });
 
         socket.on('toggleRecord', async (data) => {
+
+            const onRecError = (error) => {
+                socket.emit('record', {error: error})
+            }
+            movRecorder.on_error = onRecError
+
             console.log("received toggleRecord event");
             try {
                 if (rtspClient.frame && rtspClient.status === 'Running' && !movRecorder.recording) {
@@ -83,8 +89,8 @@ const createServer = async ({publicPath, rtspClient, movRecorder}) => {
                     movRecorder.start_async_recording(outputFile)
                     io.emit('record', { msg: "Recording started" });
                 } else if (movRecorder.recording) {
-                    await movRecorder.stop_recording()
-                    io.emit('record', { msg: "Recording stopped" })
+                    const outputFile = await movRecorder.stop_recording()
+                    io.emit('record', { filename: outputFile })
                 }
             } catch (error) {
                 io.emit('record', { error: `${error}` });
