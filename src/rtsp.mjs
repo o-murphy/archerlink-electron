@@ -39,7 +39,7 @@ class RTSPClient {
         const handleError = (err) => {
             console.error(`FFmpeg error: ${err.message}`);
             if (this._ffmpegProcess) {
-                this._ffmpegProcess.removeListener('error', handleError); // Remove the listener if it exists
+                this._ffmpegProcess.removeListener('error', handleError);
             }
             _sleep(1000).then(() => this._reconnect());
         };
@@ -52,12 +52,12 @@ class RTSPClient {
                 this._ffmpegProcess = ffmpeg(this.rtspUri)
                     .addOption('-f', 'image2pipe')
                     .addOption('-vf', `fps=${this.fps}`)
-                    .videoCodec('mjpeg') // Specify MJPEG codec for JPEG encoding
-                    .addOption('-q:v', '1') // Adjust quality (2 is a good balance between size and quality)
+                    .videoCodec('mjpeg')
+                    .addOption('-q:v', '1')
                     .format('image2pipe')
                     .on('error', handleError)
 
-                this._ffmpegProcess.setMaxListeners(5); // Set max listeners limit
+                this._ffmpegProcess.setMaxListeners(5);
 
                 this._stream = this._ffmpegProcess.pipe();
                 await this._getStreamFps();
@@ -178,7 +178,7 @@ class RTSPClient {
             this._socket.on('error', (err) => {
                 if (err.code === 'ECONNRESET') {
                     console.error('Socket error: read ECONNRESET, reconnecting...');
-                    this._reconnect(); // Handle ECONNRESET by reconnecting
+                    this._reconnect();
                 } else {
                     throw new Error(`Socket error: ${err.message}`);
                 }

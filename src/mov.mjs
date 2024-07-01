@@ -12,8 +12,8 @@ class MovRecorder {
         this.recording = true;
 
         this.ffmpegProcess = ffmpeg(this.rtsp.uri)
-            .inputOptions('-rtsp_transport', 'tcp') // Specify RTSP transport
-            .outputOptions('-c:v', 'libx264') // Specify video codec
+            .inputOptions('-rtsp_transport', 'tcp')
+            .outputOptions('-c:v', 'libx264')
             .output(this.filename)
             .on('error', (err, stdout, stderr) => {
                 console.error('Error:', err.message);

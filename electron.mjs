@@ -1,9 +1,7 @@
 import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
-import RTSPClient from './src/rtsp.mjs'; // Adjust the path as necessary
+import RTSPClient from './src/rtsp.mjs';
 import createServer, { wifiCheckInterval } from './src/server.mjs';
-
-// console.log("App path", app.getAppPath())
 
 const __dirname = path.resolve()
 console.log("dirname", __dirname)
@@ -20,6 +18,7 @@ const rtspConfig = {
 const rtspClient = new RTSPClient(rtspConfig.host, rtspConfig.port, rtspConfig.uri);
 rtspClient.runAsync();
 
+// Start server
 const server = await createServer(
   {
     publicPath: path.join(__dirname, 'public'),
@@ -32,7 +31,6 @@ let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    // useContentSize: true,
     width: 720,
     height: 480,
     minWidth: 720,
@@ -46,7 +44,7 @@ function createWindow() {
   });
 
   mainWindow.once('ready-to-show', () => {
-    mainWindow.show(); // Show the window when content is ready
+    mainWindow.show();
   });
 
   // Menu.setApplicationMenu(null)
@@ -68,7 +66,7 @@ app.on('window-all-closed', function () {
         console.log('Express server closed');
       });
     }
-    app.quit(); // Quit the Electron app after closing the server
+    app.quit();
   }
 });
 
