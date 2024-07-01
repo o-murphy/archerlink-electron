@@ -3,7 +3,7 @@ import path from 'path';
 import RTSPClient from './src/rtsp.mjs'; // Adjust the path as necessary
 import createServer, { wifiCheckInterval } from './src/server.mjs';
 
-console.log("App path", app.getAppPath())
+// console.log("App path", app.getAppPath())
 
 const __dirname = path.resolve()
 console.log("dirname", __dirname)
@@ -32,8 +32,11 @@ let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
+    // useContentSize: true,
     width: 720,
-    height: 540,
+    height: 480,
+    minWidth: 720,
+    minHeight: 480,
     show: false,
     webPreferences: {
       nodeIntegration: true,

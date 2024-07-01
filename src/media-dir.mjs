@@ -4,18 +4,20 @@ import { join } from 'path';
 import fs, { mkdir } from 'fs/promises';
 import { DateTime } from 'luxon';
 
+const outputDirWindows = process.env.LOCALAPPDATA ? join(process.env.LOCALAPPDATA, 'ArcherLink') : join(app.getPath('userData'), 'ArcherLink');
+const outputDirOthers = process.env.HOME ? join(process.env.HOME, 'Pictures', 'ArcherLink') : join(app.getPath('pictures'), 'ArcherLink');
 
-const OUTPUT_DIR_WINDOWS = join(process.env.LOCALAPPDATA, 'ArcherLink');
-const OUTPUT_DIR_OTHERS = join(process.env.HOME, 'Pictures', 'ArcherLink');
+const outputDir = process.platform === 'win32' ? outputDirWindows : outputDirOthers;
+
 
 const createOutputDir = async () => {
-    let outputDir;
+    // let outputDir;
 
-    if (platform() === 'win32') {
-        outputDir = OUTPUT_DIR_WINDOWS;
-    } else {
-        outputDir = OUTPUT_DIR_OTHERS;
-    }
+    // if (platform() === 'win32') {
+    //     outputDir = OUTPUT_DIR_WINDOWS;
+    // } else {
+    //     outputDir = OUTPUT_DIR_OTHERS;
+    // }
 
     try {
         await mkdir(outputDir, { recursive: true });
@@ -28,13 +30,13 @@ const createOutputDir = async () => {
 
 const openOutputDir = async () => {
 
-    let outputDir;
+    // let outputDir;
 
-    if (platform() === 'win32') {
-        outputDir = OUTPUT_DIR_WINDOWS;
-    } else {
-        outputDir = OUTPUT_DIR_OTHERS;
-    }
+    // if (platform() === 'win32') {
+    //     outputDir = OUTPUT_DIR_WINDOWS;
+    // } else {
+    //     outputDir = OUTPUT_DIR_OTHERS;
+    // }
 
     if (platform() === 'win32') {
         // Open directory using PowerShell on Windows
@@ -57,13 +59,13 @@ const openOutputDir = async () => {
 
 
 const getOutputFilename = async () => {
-    let outputDir;
+    // let outputDir;
 
-    if (platform() === 'win32') {
-        outputDir = OUTPUT_DIR_WINDOWS;
-    } else {
-        outputDir = OUTPUT_DIR_OTHERS;
-    }
+    // if (platform() === 'win32') {
+    //     outputDir = OUTPUT_DIR_WINDOWS;
+    // } else {
+    //     outputDir = OUTPUT_DIR_OTHERS;
+    // }
 
     const dt = DateTime.now().toFormat('yyMMdd-HHmmss');
     return join(outputDir, `${dt}`);

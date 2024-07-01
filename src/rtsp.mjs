@@ -8,11 +8,9 @@ console.log("FFmpeg:", ffmpegPath)
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 
-
 const _sleep = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
 
 
 class RTSPClient {
@@ -33,7 +31,6 @@ class RTSPClient {
 
     async _getStreamFps() {
         // Custom implementation might be needed
-        // this.fps = this.fps; // Placeholder
         console.info(`Stream FPS: ${this.fps}`);
     }
 
@@ -63,7 +60,6 @@ class RTSPClient {
                 this._ffmpegProcess.setMaxListeners(5); // Set max listeners limit
 
                 this._stream = this._ffmpegProcess.pipe();
-                // this._stream.setMaxListeners(2)
                 await this._getStreamFps();
                 console.info("Connected to stream");
                 break;
@@ -123,24 +119,6 @@ class RTSPClient {
         });
     }
 
-    // async _readFrame() {
-    //     // TODO: add timeout
-    //     return new Promise((resolve, reject) => {
-    //         const handleData = async (chunk) => {
-    //             this._stream.removeListener('error', handleError); // Remove the error listener
-    //             resolve(chunk);
-    //         };
-
-    //         const handleError = (err) => {
-    //             this._stream.removeListener('data', handleData); // Remove the data listener
-    //             reject(new Error("Failed to read frame"));
-    //         };
-
-    //         this._stream.once('data', handleData);
-    //         this._stream.once('error', handleError);
-    //     });
-    // }
-
     async runAsync() {
         try {
             console.info("Running RTSP client");
@@ -177,33 +155,6 @@ class RTSPClient {
         }
         await this._close();
     }
-
-    // async _initSocket(host, port) {
-    //     try {
-    //         if (!(await this._ping(host))) {
-    //             throw new Error("Host is not reachable");
-    //         }
-
-    //         this._socket = new net.Socket();
-    //         this._socket.connect(port, host, () => {
-    //             const initCommand = "CMD_RTSP_TRANS_START";
-    //             this._socket.write(initCommand);
-    //             this._socket.once('data', (data) => {
-    //                 const response = data.toString();
-    //                 console.info(`Response: ${response}`);
-    //                 if (!response.includes("CMD_ACK_START_RTSP_LIVE")) {
-    //                     throw new Error("Socket error");
-    //                 }
-    //             });
-    //         });
-
-    //         this._socket.on('error', (err) => {
-    //             throw new Error(`Socket error: ${err.message}`);
-    //         });
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // }
 
     async _initSocket(host, port) {
         try {
