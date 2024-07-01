@@ -7,7 +7,7 @@ import { DateTime } from 'luxon';
 const outputDirWindows = process.env.LOCALAPPDATA ? join(process.env.LOCALAPPDATA, 'ArcherLink') : undefined;
 const outputDirOthers = process.env.HOME ? join(process.env.HOME, 'Pictures', 'ArcherLink') : undefined;
 
-const outputDir = process.platform === 'win32' ? outputDirWindows : outputDirOthers;
+export const outputDir = process.platform === 'win32' ? outputDirWindows : outputDirOthers;
 
 
 const createOutputDir = async () => {

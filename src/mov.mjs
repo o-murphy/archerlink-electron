@@ -1,25 +1,31 @@
-class MovRecorder {
-    constructor(rtsp, on_error) {
+import path from 'path';
+import ffmpeg from 'fluent-ffmpeg';
+import { outputDir } from "./media-dir.mjs";
+
+
+export default class MovRecorder {
+    constructor(rtsp_uri, on_error) {
         this.filename = null;
-        this.rtsp = rtsp;
+        this.rtspUri = rtsp_uri;
         this.recording = false;
         this.on_error = on_error;
         this.ffmpegProcess = null;
+        this.fps = 50;
     }
 
     async start_async_recording(filename) {
-        this.filename = path.join(OUTPUT_DIR, filename + '.mov');
+        this.filename = path.join(filename + '.mov');
         this.recording = true;
-
-        this.ffmpegProcess = ffmpeg(this.rtsp.uri)
-            .inputOptions('-rtsp_transport', 'tcp')
-            .outputOptions('-c:v', 'libx264')
+        this.ffmpegProcess = ffmpeg(this.rtspUri)
+            .addOptions(['-acodec copy', '-vcodec copy'])
             .output(this.filename)
+            .format('mov')
             .on('error', (err, stdout, stderr) => {
                 console.error('Error:', err.message);
                 console.error('ffmpeg stdout:', stdout);
                 console.error('ffmpeg stderr:', stderr);
-                this._error = err;
+                this.recording = false;
+                this.ffmpegProcess = null;
                 if (this.on_error && typeof this.on_error === 'function') {
                     this.on_error(err);
                 }

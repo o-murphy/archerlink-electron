@@ -1,7 +1,7 @@
 import express from 'express';
 import { Server } from 'socket.io';
 import checkWifiConnection from './check-wifi.mjs';
-import { createOutputDir, openOutputDir, saveFrameToFile } from './media-dir.mjs';
+import { createOutputDir, openOutputDir, saveFrameToFile, getOutputFilename } from './media-dir.mjs';
 
 
 await createOutputDir()
@@ -20,7 +20,7 @@ export const wifiCheckInterval = setInterval(async () => {
 }, 1000); // Check every 1 seconds
 
 
-const createServer = async ({publicPath, rtspClient}) => {
+const createServer = async ({publicPath, rtspClient, movRecorder}) => {
     const exp = express();
     exp.use(express.static(publicPath));
     // Start the Express server
@@ -47,7 +47,7 @@ const createServer = async ({publicPath, rtspClient}) => {
                     error: rtspClient.error,
                 },
                 recording: {
-                    state: false,  // TODO: recorder
+                    state: movRecorder.recording,  // TODO: recorder
                 }
             });
         };
@@ -77,7 +77,18 @@ const createServer = async ({publicPath, rtspClient}) => {
 
         socket.on('toggleRecord', async (data) => {
             console.log("received toggleRecord event");
-            io.emit('record', {error: 'Not implemented yet'})
+            try {
+                if (rtspClient.frame && rtspClient.status === 'Running' && !movRecorder.recording) {
+                    const outputFile = await getOutputFilename(); // Get the output filename
+                    movRecorder.start_async_recording(outputFile)
+                    io.emit('record', { msg: "Recording started" });
+                } else if (movRecorder.recording) {
+                    movRecorder.stop_recording()
+                    io.emit('record', { msg: "Recording stopped" })
+                }
+            } catch (error) {
+                io.emit('record', { error: `${error}` });
+            }
         });
     
         socket.on('disconnect', () => {

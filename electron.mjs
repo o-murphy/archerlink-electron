@@ -2,6 +2,7 @@ import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import RTSPClient from './src/rtsp.mjs';
 import createServer, { wifiCheckInterval } from './src/server.mjs';
+import MovRecorder from './src/mov.mjs';
 
 const __dirname = path.resolve()
 console.log("dirname", __dirname)
@@ -18,11 +19,15 @@ const rtspConfig = {
 const rtspClient = new RTSPClient(rtspConfig.host, rtspConfig.port, rtspConfig.uri);
 rtspClient.runAsync();
 
+// Create recorder
+const movRecorder = new MovRecorder(rtspConfig.uri, (err) => console.error(err))
+
 // Start server
 const server = await createServer(
   {
     publicPath: path.join(__dirname, 'public'),
-    rtspClient: rtspClient
+    rtspClient: rtspClient,
+    movRecorder: movRecorder
   }
 )
 
