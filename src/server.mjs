@@ -83,7 +83,7 @@ const createServer = async ({publicPath, rtspClient, movRecorder}) => {
                     movRecorder.start_async_recording(outputFile)
                     io.emit('record', { msg: "Recording started" });
                 } else if (movRecorder.recording) {
-                    movRecorder.stop_recording()
+                    await movRecorder.stop_recording()
                     io.emit('record', { msg: "Recording stopped" })
                 }
             } catch (error) {

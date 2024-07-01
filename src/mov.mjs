@@ -17,7 +17,8 @@ export default class MovRecorder {
         this.filename = path.join(filename + '.mov');
         this.recording = true;
         this.ffmpegProcess = ffmpeg(this.rtspUri)
-            .addOptions(['-acodec copy', '-vcodec copy'])
+            .addOption('-acodec', 'copy')
+            .addOption('-vcodec', 'libx264')
             .output(this.filename)
             .format('mov')
             .on('error', (err, stdout, stderr) => {
@@ -34,18 +35,34 @@ export default class MovRecorder {
                 console.log('ffmpeg recording finished');
                 this.recording = false;
                 this.ffmpegProcess = null;
-            });
+            })
 
         this.ffmpegProcess.run();
     }
 
     async stop_recording() {
         if (this.ffmpegProcess) {
-            this.ffmpegProcess.kill('SIGINT'); // Send SIGINT to stop ffmpeg process
-            await execPromise(`taskkill /pid ${this.ffmpegProcess.pid} /T /F`); // Force kill the process on Windows
+            // Send SIGINT to stop ffmpeg process
+            // this.ffmpegProcess.write('q')
+            this.ffmpegProcess.kill('SIGINT');
+
+            // // For Windows: Force kill the process
+            // if (process.platform === 'win32') {
+            //     await execPromise(`taskkill /pid ${this.ffmpegProcess.pid} /T /F`);
+            // }
+
+            // Wait for the process to close
+            await new Promise((resolve) => {
+                this.ffmpegProcess.on('close', (code) => {
+                    console.log(`ffmpeg process exited with code ${code}`);
+                    resolve();
+                });
+            });
+
             this.recording = false;
             this.ffmpegProcess = null;
         }
+
         return this.filename;
     }
 }
