@@ -16,6 +16,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Download FFmpeg Release
+        run: |
+          mkdir ffmpeg
+          curl -sSL -o ffmpeg.zip https://github.com/sudo-nautilus/FFmpeg-Builds-Win32/releases/download/latest/ffmpeg-n6.0-latest-win32-gpl-6.0.zip
+          Expand-Archive -Path ffmpeg.zip -DestinationPath ffmpeg
+
+      - name: List contents of ffmpeg directory
+        run: ls -R ./ffmpeg
+
+      - name: Move ffmpeg.exe to root
+        run: mv ./ffmpeg/bin/ffmpeg.exe ./ffmpeg.exe
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -26,15 +38,6 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
-
-      - name: Download FFmpeg Release
-        run: |
-          mkdir ffmpeg
-          curl -sSL -o ffmpeg.zip https://github.com/sudo-nautilus/FFmpeg-Builds-Win32/releases/download/latest/ffmpeg-n6.0-latest-win32-gpl-6.0.zip
-          Expand-Archive -Path ffmpeg.zip -DestinationPath ffmpeg
-
-      - name: Move ffmpeg.exe to root
-        run: mv ./ffmpeg/bin/ffmpeg.exe ./ffmpeg.exe
 
       - name: Build for Win32
         run: npm run build:win32
