@@ -1,11 +1,8 @@
 name: Build for Windows x86
 
 on:
-  push:
-    branches:
-      - main  # Adjust branch name as needed
-
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -31,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '18'  # Adjust Node.js version as needed
+          node-version: '18'
 
       - name: Install Yarn
         run: npm install -g yarn
@@ -40,12 +37,13 @@ jobs:
         run: yarn install
 
       - name: Build for Win32
+        id: build-win32
         run: npm run build:win32
-
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Set the GitHub Personal Access Token
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Export dist directory
+        if: success()  # Only proceed if the build succeeded
         uses: actions/upload-artifact@v2
         with:
           name: dist-artifact
@@ -56,7 +54,11 @@ jobs:
     name: Upload Release Asset
     runs-on: ubuntu-latest  # Run this job on Ubuntu
 
-    needs: build  # Ensure the build job has completed successfully
+    needs: build
+    if: |
+      github.event_name == 'release' &&
+      github.event.action == 'published' &&
+      needs.build.result == 'success'  # Ensure build job was successful
 
     steps:
       - name: Download artifact
