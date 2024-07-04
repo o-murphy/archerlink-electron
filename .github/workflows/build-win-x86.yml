@@ -62,6 +62,10 @@ jobs:
         with:
           name: dist-artifact
 
+      - name: List
+        run: |
+          ls
+
       - name: Find file to upload
         id: find-file
         run: |
