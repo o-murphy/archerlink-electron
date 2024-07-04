@@ -1,15 +1,15 @@
-import express from 'express';
-import { Server } from 'socket.io';
-import checkWifiConnection from './check-wifi.mjs';
-import { createOutputDir, openOutputDir, saveFrameToFile, getOutputFilename } from './media-dir.mjs';
+const express = require('express');
+const { Server } = require('socket.io');
+const checkWifiConnection = require('./check-wifi.js');
+const { createOutputDir, openOutputDir, saveFrameToFile, getOutputFilename } = require('./media-dir.js');
 
 
-await createOutputDir()
+
 
 let wifiStatus = false; // Initial state
 
 // Periodically check Wi-Fi connection every 30 seconds
-export const wifiCheckInterval = setInterval(async () => {
+const wifiCheckInterval = setInterval(async () => {
   const currentWifi = await checkWifiConnection();
   
   // Update wifiStatus only if it has changed
@@ -21,6 +21,7 @@ export const wifiCheckInterval = setInterval(async () => {
 
 
 const createServer = async ({publicPath, rtspClient, movRecorder}) => {
+    createOutputDir();  // FIXME: maybe have to await
     const exp = express();
     exp.use(express.static(publicPath));
     // Start the Express server
@@ -106,7 +107,6 @@ const createServer = async ({publicPath, rtspClient, movRecorder}) => {
     return server
 }
 
-
-
-
-export default createServer
+module.exports = {
+    wifiCheckInterval, createServer
+}

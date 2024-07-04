@@ -77,5 +77,5 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 ```bash
 npm install gprc-tools
-node node_modules/grpc-tools/bin/protoc.js --js_out=import_style=commonjs,binary:./src/proto --proto_path=./src/proto ./src/proto/archer_protocol.proto
+node node_modules/grpc-tools/bin/protoc.js --js_out=import_style=commonjs,binary:./src/proto --proto_path=./src/proto ./src/proto/b.proto
 ```

@@ -11,8 +11,8 @@
     "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
-    "electron": "^31.0.2",
-    "electron-builder": "^24.13.3",
+    "electron": "22",
+    "electron-builder": "22.14.13",
     "grpc-tools": "^1.12.4"
   },
   "scripts": {
@@ -21,13 +21,15 @@
     "build:win32": "electron-builder build --win --ia32",
     "build:win64": "electron-builder build --win --x64"
   },
-  "main": "electron.mjs",
+  "main": "electron.cjs",
   "build": {
     "appId": "com.example.archerlink",
     "productName": "ArcherLink",
     "files": [
-      "./*.mjs",
-      "./src/*.mjs"
+      "./*.js",
+      "./*.cjs",
+      "./src/*.js",
+      "./src/*.cjs"
     ],
     "extraFiles": [
       "./ffmpeg.exe",
@@ -35,7 +37,7 @@
     ],
     "extraResources": [],
     "extraMetadata": {
-      "main": "./electron.mjs"
+      "main": "./electron.cjs"
     },
     "win": {
       "target": "nsis",
