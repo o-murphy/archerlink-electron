@@ -1,0 +1,54 @@
+name: Build for Windows x86
+
+on:
+  push:
+    branches:
+      - main  # Adjust branch name as needed
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'  # Adjust Node.js version as needed
+
+      - name: Install Yarn
+        run: npm install -g yarn
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Download FFmpeg Release
+        id: download-ffmpeg
+        uses: dawidd6/action-download-release@v2
+        with:
+          repo: sudo-nautilus/FFmpeg-Builds-Win32
+          tag: latest  # Replace with the tag or release name as needed
+          asset-name: ffmpeg-n6.0-latest-win32-gpl-6.0.zip
+          target-dir: ffmpeg  # Directory to extract the downloaded asset
+
+      - name: Extract FFmpeg Release
+        run: |
+          mkdir ffmpeg
+          Expand-Archive -Path ${{ steps.download-ffmpeg.outputs.download-path }} -DestinationPath ffmpeg
+
+      - name: Move ffmpeg.exe to root
+        run: mv ./ffmpeg/bin/ffmpeg.exe ./ffmpeg.exe
+
+      - name: Build for Win32
+        run: npm run build:win32
+
+      - name: Export dist directory
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist-artifact
+          path: ./dist

@@ -33,6 +33,8 @@
     ],
     "extraFiles": [
       "./ffmpeg.exe",
+      "./LICENSE",
+      "./LICENSE.ffmpeg.txt",
       "./public/**/*"
     ],
     "extraResources": [],
