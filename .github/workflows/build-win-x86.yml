@@ -19,7 +19,7 @@ jobs:
       - name: Download FFmpeg Release
         run: |
           mkdir ffmpeg
-          curl -sSL -o ffmpeg.zip https://github.com/sudo-nautilus/FFmpeg-Builds-Win32/releases/download/latest/ffmpeg-n6.0-latest-win32-gpl-6.0.zip
+          curl -sSL -o ffmpeg.zip https://github.com/sudo-nautilus/FFmpeg-Builds-Win32/releases/latest/download/ffmpeg-n6.0-latest-win32-gpl-6.0.zip
           Expand-Archive -Path ffmpeg.zip -DestinationPath ffmpeg
 
       - name: List contents of ffmpeg directory
