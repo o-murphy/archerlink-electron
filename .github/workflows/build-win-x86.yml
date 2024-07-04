@@ -62,14 +62,14 @@ jobs:
         with:
           name: dist-artifact
 
-      - name: List
+      - name: List dir
         run: |
           ls
 
       - name: Find file to upload
         id: find-file
         run: |
-          file=$(find ./archerlink-electron/dist -type f -name "ArcherLink*")
+          file=$(find ./ -type f -name "ArcherLink*")
           echo "::set-output name=file_path::$file"
 
       - name: Upload a file to Release Assets
