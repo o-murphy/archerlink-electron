@@ -42,6 +42,9 @@ jobs:
       - name: Build for Win32
         run: npm run build:win32
 
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Set the GitHub Personal Access Token
+
       - name: Export dist directory
         uses: actions/upload-artifact@v2
         with:
