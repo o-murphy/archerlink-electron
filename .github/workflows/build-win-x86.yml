@@ -28,18 +28,10 @@ jobs:
         run: yarn install
 
       - name: Download FFmpeg Release
-        id: download-ffmpeg
-        uses: dawidd6/action-download-release@v2
-        with:
-          repo: sudo-nautilus/FFmpeg-Builds-Win32
-          tag: latest  # Replace with the tag or release name as needed
-          asset-name: ffmpeg-n6.0-latest-win32-gpl-6.0.zip
-          target-dir: ffmpeg  # Directory to extract the downloaded asset
-
-      - name: Extract FFmpeg Release
         run: |
           mkdir ffmpeg
-          Expand-Archive -Path ${{ steps.download-ffmpeg.outputs.download-path }} -DestinationPath ffmpeg
+          curl -sSL -o ffmpeg.zip https://github.com/sudo-nautilus/FFmpeg-Builds-Win32/releases/download/latest/ffmpeg-n6.0-latest-win32-gpl-6.0.zip
+          Expand-Archive -Path ffmpeg.zip -DestinationPath ffmpeg
 
       - name: Move ffmpeg.exe to root
         run: mv ./ffmpeg/bin/ffmpeg.exe ./ffmpeg.exe
