@@ -70,7 +70,9 @@ jobs:
         id: find-file
         run: |
           file=$(find ./ -type f -name "ArcherLink*")
-          echo "::set-output name=file_path::$file"
+          echo "file_path=$file" >> $GITHUB_ENV
+          filename=$(basename $file)
+          echo "file_name=$filename" >> $GITHUB_ENV
 
       - name: Upload a file to Release Assets
         id: upload-release-asset
@@ -79,6 +81,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ steps.find-file.outputs.file_path }}
-          asset_name: ${{ steps.find-file.outputs.file_name }}
+          asset_path: ${{ env.file_path }}
+          asset_name: ${{ env.file_name }}
           asset_content_type: application/octet-stream
