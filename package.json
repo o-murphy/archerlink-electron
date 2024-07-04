@@ -2,6 +2,12 @@
   "name": "archerlink-electron",
   "version": "0.1.0",
   "private": true,
+  "author": "Dmytro Yaroshenko (o-murphy) https://github.com/o-murphy",
+  "homepage": "https://github.com/tvt-tech/archerlink-electron",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tvt-tech/archerlink-electron.git"
+  },
   "dependencies": {
     "express": "^4.19.2",
     "fluent-ffmpeg": "^2.1.2",
@@ -23,7 +29,7 @@
   },
   "main": "electron.cjs",
   "build": {
-    "appId": "com.example.archerlink",
+    "appId": "com.archerlink.app",
     "productName": "ArcherLink",
     "files": [
       "./*.js",

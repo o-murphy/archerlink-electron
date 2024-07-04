@@ -50,3 +50,33 @@ jobs:
         with:
           name: dist-artifact
           path: ./dist
+
+
+  upload-release-asset:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest  # Run this job on Ubuntu
+
+    needs: build  # Ensure the build job has completed successfully
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: dist-artifact
+
+      - name: Find file to upload
+        id: find-file
+        run: |
+          file=$(find ./dist -type f -name "ArcherLink*")
+          echo "::set-output name=file_path::$file"
+
+      - name: Upload a file to Release Assets
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub token automatically provided by GitHub Actions
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ steps.find-file.outputs.file_path }}
+          asset_name: ${{ steps.find-file.outputs.file_name }}
+          asset_content_type: application/octet-stream
