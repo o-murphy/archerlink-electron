@@ -1,22 +1,28 @@
-import { platform } from 'os';
-import { execFile } from 'child_process';
-import { join } from 'path';
-import fs, { mkdir } from 'fs/promises';
-import { DateTime } from 'luxon';
+const { platform } = require('os');
+const { execFile } = require('child_process');
+const { join } = require('path');
+const fs = require('fs/promises');
+const { DateTime } = require('luxon');
 
 const outputDirWindows = process.env.LOCALAPPDATA ? join(process.env.LOCALAPPDATA, 'ArcherLink') : undefined;
 const outputDirOthers = process.env.HOME ? join(process.env.HOME, 'Pictures', 'ArcherLink') : undefined;
 
-export const outputDir = process.platform === 'win32' ? outputDirWindows : outputDirOthers;
+const outputDir = process.platform === 'win32' ? outputDirWindows : outputDirOthers;
 
 
 const createOutputDir = async () => {
+    if (!outputDir) {
+        console.error('Output directory is not defined');
+        return; // Exit function early if outputDir is undefined
+    }
+
     try {
-        await mkdir(outputDir, { recursive: true });
+        await fs.mkdir(outputDir, { recursive: true });
         console.log(`Output directory created: ${outputDir}`);
-        return outputDir
+        return outputDir;
     } catch (err) {
         console.error('Error creating output directory:', err);
+        throw err; // Re-throw the error to be caught by the caller
     }
 };
 
@@ -59,4 +65,6 @@ async function saveFrameToFile(frame) {
     }
 }
 
-export { createOutputDir, openOutputDir, getOutputFilename, saveFrameToFile };
+module.exports = {
+    outputDir, createOutputDir, openOutputDir, getOutputFilename, saveFrameToFile
+};

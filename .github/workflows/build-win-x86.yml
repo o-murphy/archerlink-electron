@@ -1,0 +1,82 @@
+name: Build for Windows x86
+
+on:
+  push:
+    branches:
+      - main  # Adjust branch name as needed
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download FFmpeg Release
+        run: |
+          mkdir ffmpeg
+          curl -sSL -o ffmpeg.zip https://github.com/sudo-nautilus/FFmpeg-Builds-Win32/releases/latest/download/ffmpeg-n6.0-latest-win32-gpl-6.0.zip
+          Expand-Archive -Path ffmpeg.zip -DestinationPath ffmpeg
+
+      - name: List contents of ffmpeg directory
+        run: ls -R ./ffmpeg
+
+      - name: Move ffmpeg.exe to root
+        run: mv ./ffmpeg/ffmpeg-n6.0-latest-win32-gpl-6.0/bin/ffmpeg.exe ./ffmpeg.exe
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'  # Adjust Node.js version as needed
+
+      - name: Install Yarn
+        run: npm install -g yarn
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build for Win32
+        run: npm run build:win32
+
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Set the GitHub Personal Access Token
+
+      - name: Export dist directory
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist-artifact
+          path: ./dist
+
+
+  upload-release-asset:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest  # Run this job on Ubuntu
+
+    needs: build  # Ensure the build job has completed successfully
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: dist-artifact
+
+      - name: Find file to upload
+        id: find-file
+        run: |
+          file=$(find ./dist -type f -name "ArcherLink*")
+          echo "::set-output name=file_path::$file"
+
+      - name: Upload a file to Release Assets
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub token automatically provided by GitHub Actions
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ steps.find-file.outputs.file_path }}
+          asset_name: ${{ steps.find-file.outputs.file_name }}
+          asset_content_type: application/octet-stream

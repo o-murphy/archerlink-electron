@@ -2,6 +2,12 @@
   "name": "archerlink-electron",
   "version": "0.1.0",
   "private": true,
+  "author": "Dmytro Yaroshenko (o-murphy) https://github.com/o-murphy",
+  "homepage": "https://github.com/tvt-tech/archerlink-electron",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tvt-tech/archerlink-electron.git"
+  },
   "dependencies": {
     "express": "^4.19.2",
     "fluent-ffmpeg": "^2.1.2",
@@ -11,8 +17,8 @@
     "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
-    "electron": "^31.0.2",
-    "electron-builder": "^24.13.3",
+    "electron": "22",
+    "electron-builder": "22.14.13",
     "grpc-tools": "^1.12.4"
   },
   "scripts": {
@@ -21,21 +27,25 @@
     "build:win32": "electron-builder build --win --ia32",
     "build:win64": "electron-builder build --win --x64"
   },
-  "main": "electron.mjs",
+  "main": "electron.cjs",
   "build": {
-    "appId": "com.example.archerlink",
+    "appId": "com.archerlink.app",
     "productName": "ArcherLink",
     "files": [
-      "./*.mjs",
-      "./src/*.mjs"
+      "./*.js",
+      "./*.cjs",
+      "./src/*.js",
+      "./src/*.cjs"
     ],
     "extraFiles": [
       "./ffmpeg.exe",
+      "./LICENSE",
+      "./LICENSE.ffmpeg.txt",
       "./public/**/*"
     ],
     "extraResources": [],
     "extraMetadata": {
-      "main": "./electron.mjs"
+      "main": "./electron.cjs"
     },
     "win": {
       "target": "nsis",

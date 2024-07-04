@@ -1,9 +1,8 @@
-import path from 'path';
-import ffmpeg from 'fluent-ffmpeg';
-import { outputDir } from "./media-dir.mjs";
+const path = require('path');
+const ffmpeg = require('fluent-ffmpeg');
 
 
-export default class MovRecorder {
+class MovRecorder {
     constructor(rtsp_uri, on_error) {
         this.filename = null;
         this.rtspUri = rtsp_uri;
@@ -79,3 +78,5 @@ export default class MovRecorder {
         return this.filename;
     }
 }
+
+module.exports = MovRecorder;

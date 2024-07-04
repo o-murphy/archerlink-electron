@@ -1,10 +1,10 @@
-import ffmpeg from 'fluent-ffmpeg';
-import net from 'net';
-import { exec } from 'child_process';
-import path from 'path';
+const ffmpeg = require('fluent-ffmpeg');
+const net = require('net');
+const { exec } = require('child_process');
+const path = require('path');
 
 const ffmpegPath = path.resolve('./ffmpeg.exe');
-console.log("FFmpeg:", ffmpegPath)
+console.log("FFmpeg:", ffmpegPath);
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 
@@ -212,4 +212,4 @@ class RTSPClient {
     }
 }
 
-export default RTSPClient;
+module.exports = RTSPClient;
