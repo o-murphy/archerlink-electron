@@ -26,7 +26,7 @@ jobs:
         run: ls -R ./ffmpeg
 
       - name: Move ffmpeg.exe to root
-        run: mv ./ffmpeg/bin/ffmpeg.exe ./ffmpeg.exe
+        run: mv ./ffmpeg/ffmpeg-n6.0-latest-win32-gpl-6.0/bin/ffmpeg.exe ./ffmpeg.exe
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
