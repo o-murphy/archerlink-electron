@@ -30,7 +30,7 @@ const createServer = async ({publicPath, rtspClient, movRecorder}) => {
     });
     
     const io = new Server(server, {
-        path: '/ws',
+        path: '/ws/socket.io',
         cors: {
             origin: "*",
         }
